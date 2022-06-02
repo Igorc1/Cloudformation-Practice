@@ -1,0 +1,82 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "this temp creates a vpc and 2 subnets, IGW, route tables and asscoiations, ready to launch EC2 instance in pub Subnet",
+    "Metadata": {
+
+    },
+    "Parameters": {
+
+    },
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {
+      "wfvpc": {
+        "Type": "AWS::EC2::VPC",
+        "Properties": {
+          "CidrBlock": "10.0.0.0/16",
+          "Tags": [{ "Key": "Name", "Value":  "w-f-vpc-01" }]
+        }
+      },
+      "wfSNPUB": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "AvailabilityZone": "us-east-1a",
+          "VpcId": { "Ref": "wfvpc" },
+          "CidrBlock": "10.0.0.1/24",
+          "Tags": [{ "Key": "Name", "Value":  "w-f-SN1-PUB" }]
+        }
+      },
+      "wfSNPRIVATE": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "AvailabilityZone": "us-east-1b",
+          "VpcId": { "Ref": "wfvpc" },
+          "CidrBlock": "10.0.10.1/26",
+          "Tags": [{ "Key": "Name", "Value":  "w-f-SN2-PRIVATE" }]
+        }
+      },
+      "wfvpcIGW": {
+        "Type": "AWS::EC2::InternetGateway",
+        "Properties": {
+          "Tags": [{ "Key": "Name", "Value":  "w-f-vpc-demo" }]
+        }
+      },
+      "AttachGateway": {
+        "Type": "AWS::EC2::VPCGatewayAttachment",
+        "Properties": {
+          "VpcId": { "Ref": "wfvpc" },
+          "InternetGatewayId": { "Ref": "wfvpcIGW" }
+        }
+      },
+      "RTpubtoigwVPCdemo": {
+        "Type": "AWS::EC2::RouteTable",
+        "Properties": {
+          "VpcId": { "Ref": "wfvpc" },
+          "Tags": [{ "Key": "Name", "Value":  "VPC-DEMO-Pub-IGW" }]
+        }
+      },
+      "routeTableAssocRTpubtoigwVPCdemo": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": { "Ref": "wfSNPUB" },
+          "RouteTableId": { "Ref": "RTpubtoigwVPCdemo" }
+        }
+      },
+      "routeNamePUBsntoIGW": {
+        "Type": "AWS::EC2::Route",
+        "Properties": {
+          "RouteTableId": { "Ref": "RTpubtoigwVPCdemo" },
+          "DestinationCidrBlock" : "0.0.0.0/0",
+          "GatewayId": { "Ref": "wfvpcIGW" }
+        }
+      }
+
+    },
+    "Outputs": {
+
+    }
+}
